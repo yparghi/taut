@@ -13,5 +13,5 @@ mkdir $DIR
 cp index.html "$DIR/index.html"
 cp taut.js "$DIR/taut.js"
 
-TAUT_VAR_SLACK_API_TOKEN="$(cat slack_api_token.txt)"
+TAUT_VAR_SLACK_API_TOKEN="$2"
 sed -i 's/TAUT_VAR_SLACK_API_TOKEN/'"$TAUT_VAR_SLACK_API_TOKEN"'/g' "$DIR/taut.js"
