@@ -2,7 +2,7 @@ var SLACK_API_TOKEN = "TAUT_VAR_SLACK_API_TOKEN";
 
 var UNREAD_THRESHOLD_MINUTES = 60 * 3;
 
-let channelsToRead = [ "eng", "general" ];
+var channelsToRead = null;
 
 
 function tautStart() {
@@ -16,6 +16,10 @@ function tautStart() {
 
 
 function setUpChannelDivs() {
+
+    let urlParams = new URLSearchParams(window.location.search);
+    channelsToRead = urlParams.get("channels").split(",");
+
     let mainDiv = document.getElementById("main");
 
     channelsToRead.forEach((channelName) => {
