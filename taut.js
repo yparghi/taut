@@ -7,7 +7,7 @@ function tautStart() {
     doFetch(
         "https://slack.com/api/conversations.list",
         {},
-        fetchMessages);
+        (json) => { fetchMessages(json); });
 };
 
 
@@ -59,19 +59,30 @@ function objToString(obj) {
 function fetchMessages(conversationsJson) {
     conversationsJson.channels.forEach((channelObj) => {
         if (channelsToRead.includes(channelObj.name)) {
+
+            let mainDiv = document.getElementById("main");
+            let thisChannelDiv = document.createElement("div");
+            thisChannelDiv.id = "channelDiv_" + channelObj.name;
+            mainDiv.appendChild(thisChannelDiv);
+
             doFetch(
                 "https://slack.com/api/conversations.history",
                 {
                     "channel": channelObj.id,
                     "limit": 20,
                 },
-                displayMessages);
+                (json) => { displayMessages(channelObj.name, json); });
         }
     });
 };
 
 
-function displayMessages(messagesJson) {
-    console.log("Got messages: " + objToString(messagesJson));
+function displayMessages(channelName, messagesJson) {
+    let messagesArr = messagesJson.messages;
+    messagesArr.sort((a, b) => {
+        return -1 * (parseFloat(a.ts) - parseFloat(b.ts));
+    });
+
+    let thisChannelDiv = document.getElementById("channelDiv_" + channelName);
 }
 
