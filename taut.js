@@ -1,5 +1,7 @@
 var SLACK_API_TOKEN = "TAUT_VAR_SLACK_API_TOKEN";
 
+var UNREAD_THRESHOLD_MINUTES = 60;
+
 let channelsToRead = [ "eng", "general" ];
 
 
@@ -27,14 +29,14 @@ function doFetch(urlStr, paramsDict, callbackFun) {
         if (response.ok) {
             response.json().then(jsonBody => callbackFun(jsonBody));
         } else {
-            console.log("Response error!: " + response);
+            console.log("Response error!: " + objToString(response));
         }
     });
 };
 
 
 // Thanks to: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value#Examples
-const makeCircularReplacer = () => {
+function makeCircularReplacer() {
     const seen = new WeakSet();
     return (key, value) => {
         if (typeof value === "object" && value !== null) {
@@ -85,6 +87,20 @@ function fetchMessages(conversationsJson) {
 };
 
 
+function classNameForMessage(messageObj) {
+    let tsNow = (new Date().getTime()) / 1000.0;
+    let tsMessage = parseFloat(messageObj.ts);
+    let tsThreshold = tsNow - (UNREAD_THRESHOLD_MINUTES * 60);
+
+
+    if (tsMessage > tsThreshold) {
+        return "unreadMessage";
+    } else {
+        return "readMessage";
+    }
+};
+
+
 function displayMessages(channelName, messagesJson) {
     let messagesArr = messagesJson.messages;
     messagesArr.sort((a, b) => {
@@ -100,7 +116,7 @@ function displayMessages(channelName, messagesJson) {
 
     messagesArr.forEach((message) => {
 				let messageStanza = document.createElement("p");
-        messageStanza.className = "individualMessage";
+        messageStanza.className = classNameForMessage(message);
         messageStanza.innerHTML = escapeHTML(message.text);
         thisChannelDiv.appendChild(messageStanza);
     });
