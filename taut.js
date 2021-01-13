@@ -56,6 +56,14 @@ function objToString(obj) {
 }
 
 
+// Thanks to: https://stackoverflow.com/questions/3043775/how-to-escape-html
+function escapeHTML(str){
+    var p = document.createElement("p");
+    p.appendChild(document.createTextNode(str));
+    return p.innerHTML;
+}
+
+
 function fetchMessages(conversationsJson) {
     conversationsJson.channels.forEach((channelObj) => {
         if (channelsToRead.includes(channelObj.name)) {
@@ -69,7 +77,7 @@ function fetchMessages(conversationsJson) {
                 "https://slack.com/api/conversations.history",
                 {
                     "channel": channelObj.id,
-                    "limit": 20,
+                    "limit": 10,
                 },
                 (json) => { displayMessages(channelObj.name, json); });
         }
@@ -84,5 +92,11 @@ function displayMessages(channelName, messagesJson) {
     });
 
     let thisChannelDiv = document.getElementById("channelDiv_" + channelName);
+    messagesArr.forEach((message) => {
+				let messageStanza = document.createElement("p");
+        messageStanza.className = "individualMessage";
+        messageStanza.innerHTML = escapeHTML(message.text);
+        thisChannelDiv.appendChild(messageStanza);
+    });
 }
 
