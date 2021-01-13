@@ -1,16 +1,30 @@
 var SLACK_API_TOKEN = "TAUT_VAR_SLACK_API_TOKEN";
 
-var UNREAD_THRESHOLD_MINUTES = 60;
+var UNREAD_THRESHOLD_MINUTES = 60 * 3;
 
 let channelsToRead = [ "eng", "general" ];
 
 
 function tautStart() {
+    setUpChannelDivs();
+
     doFetch(
         "https://slack.com/api/conversations.list",
         {},
         (json) => { fetchMessages(json); });
 };
+
+
+function setUpChannelDivs() {
+    let mainDiv = document.getElementById("main");
+
+    channelsToRead.forEach((channelName) => {
+        let thisChannelDiv = document.createElement("div");
+        thisChannelDiv.id = "channelDiv_" + channelName;
+        thisChannelDiv.className = "channelSection";
+        mainDiv.appendChild(thisChannelDiv);
+    });
+}
 
 
 function doFetch(urlStr, paramsDict, callbackFun) {
@@ -69,11 +83,6 @@ function escapeHTML(str){
 function fetchMessages(conversationsJson) {
     conversationsJson.channels.forEach((channelObj) => {
         if (channelsToRead.includes(channelObj.name)) {
-
-            let mainDiv = document.getElementById("main");
-            let thisChannelDiv = document.createElement("div");
-            thisChannelDiv.id = "channelDiv_" + channelObj.name;
-            mainDiv.appendChild(thisChannelDiv);
 
             doFetch(
                 "https://slack.com/api/conversations.history",

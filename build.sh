@@ -15,6 +15,7 @@ rm -rf $DIR
 mkdir $DIR
 
 cp index.html "$DIR/index.html"
+cp taut.css "$DIR/taut.css"
 cp taut.js "$DIR/taut.js"
 
 TAUT_VAR_INSTANCE_NAME="$1"
