@@ -59,11 +59,7 @@ function makeCircularReplacer() {
     return (key, value) => {
         if (typeof value === "object" && value !== null) {
             if (seen.has(value)) {
-                if (value.hasOwnProperty("shortName")) {
-                    return "[Circular: " + value.shortName + "]";
-                } else {
-                    return "[Circular]";
-                }
+                return "[Circular]";
             }
             seen.add(value);
         }
