@@ -92,6 +92,12 @@ function displayMessages(channelName, messagesJson) {
     });
 
     let thisChannelDiv = document.getElementById("channelDiv_" + channelName);
+
+    let header = document.createElement("div");
+    header.className = "channelHeader";
+    header.innerHTML = `<h3>#${escapeHTML(channelName)}</h3>`;
+    thisChannelDiv.appendChild(header);
+
     messagesArr.forEach((message) => {
 				let messageStanza = document.createElement("p");
         messageStanza.className = "individualMessage";
