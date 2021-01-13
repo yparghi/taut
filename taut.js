@@ -95,7 +95,7 @@ function displayMessages(channelName, messagesJson) {
 
     let header = document.createElement("div");
     header.className = "channelHeader";
-    header.innerHTML = `<h3>#${escapeHTML(channelName)}</h3>`;
+    header.innerHTML = `<h3>${escapeHTML("#" + channelName)}</h3>`;
     thisChannelDiv.appendChild(header);
 
     messagesArr.forEach((message) => {
