@@ -1,3 +1,7 @@
+/* TODOs:
+ * - Use 'conversations.mark' for the read/unread cursor?
+ */
+
 var SLACK_API_TOKEN = "TAUT_VAR_SLACK_API_TOKEN";
 
 var UNREAD_THRESHOLD_MINUTES = 60 * 3;
@@ -9,8 +13,12 @@ function tautStart() {
     setUpChannelDivs();
 
     doFetch(
-        "https://slack.com/api/conversations.list",
-        {},
+        "https://slack.com/api/users.conversations",
+        {
+            "exclude_archived": true,
+            "limit": 100,
+            "types": "public_channel,private_channel",
+        },
         (json) => { fetchMessages(json); });
 };
 
@@ -59,7 +67,7 @@ function makeCircularReplacer() {
     return (key, value) => {
         if (typeof value === "object" && value !== null) {
             if (seen.has(value)) {
-                return "[Circular]";
+                  return "[Circular]";
             }
             seen.add(value);
         }
@@ -68,7 +76,7 @@ function makeCircularReplacer() {
 };
 
 function objToString(obj) {
-    return JSON.stringify(obj, makeCircularReplacer(), 4);
+    return JSON.stringify(obj, makeCircularReplacer(), 2);
 }
 
 
@@ -126,7 +134,8 @@ function displayMessages(channelName, messagesJson) {
     messagesArr.forEach((message) => {
 				let messageStanza = document.createElement("p");
         messageStanza.className = classNameForMessage(message);
-        messageStanza.innerHTML = escapeHTML(message.text);
+        // Note the 'text' field is already HTML-encoded.
+        messageStanza.innerHTML = message.text;
         thisChannelDiv.appendChild(messageStanza);
     });
 }
