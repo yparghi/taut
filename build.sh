@@ -2,7 +2,7 @@
 
 # Options:
 # $1 Name for this dir/workspace/instance (arbitrary)
-# $2 API Key for the workspace
+# $2 Path to a text file with the API Key for the workspace
 
 set -u
 set -e
@@ -19,7 +19,7 @@ cp taut.css "$DIR/taut.css"
 cp taut.js "$DIR/taut.js"
 
 TAUT_VAR_INSTANCE_NAME="$1"
-TAUT_VAR_SLACK_API_TOKEN="$2"
+TAUT_VAR_SLACK_API_TOKEN=$(<"$2")
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Handle mac sed, ugh.
