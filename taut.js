@@ -6,7 +6,14 @@ var SLACK_API_TOKEN = "TAUT_VAR_SLACK_API_TOKEN";
 
 var UNREAD_THRESHOLD_MINUTES = 60 * 3;
 
-var channelsToRead = null;
+var conversationUrlParams = null;
+
+var channelsToRead = [];
+
+// Maps conversation ID -> user name
+var imIdsToNames = {};
+
+var debugEnabled = false;
 
 
 function tautStart() {
@@ -17,7 +24,7 @@ function tautStart() {
         {
             "exclude_archived": true,
             "limit": 100,
-            "types": "public_channel,private_channel",
+            "types": "public_channel,private_channel,im",
         },
         (json) => { fetchMessages(json); });
 };
@@ -26,11 +33,19 @@ function tautStart() {
 function setUpChannelDivs() {
 
     let urlParams = new URLSearchParams(window.location.search);
-    channelsToRead = urlParams.get("channels").split(",");
+    conversationUrlParams = urlParams.get("channels").split(",");
 
     let mainDiv = document.getElementById("main");
 
-    channelsToRead.forEach((channelName) => {
+    conversationUrlParams.forEach((channelName) => {
+        if (channelName.startsWith("im:")) {
+            let parts = channelName.split(":")
+            channelName = parts[1];
+            imIdsToNames[parts[2]] = channelName;
+        } else {
+            channelsToRead.push(channelName);
+        }
+
         let thisChannelDiv = document.createElement("div");
         thisChannelDiv.id = "channelDiv_" + channelName;
         thisChannelDiv.className = "channelSection";
@@ -87,18 +102,38 @@ function escapeHTML(str){
     return p.innerHTML;
 }
 
+function debug(message) {
+    if (!debugEnabled) {
+        return;
+    }
+    console.log(message);
+}
+
 
 function fetchMessages(conversationsJson) {
-    conversationsJson.channels.forEach((channelObj) => {
-        if (channelsToRead.includes(channelObj.name)) {
+    debug("Got conversations:\n" + objToString(conversationsJson));
 
+    conversationsJson.channels.forEach((conversationObj) => {
+        var conversationId = null;
+        var channelName = null;
+        var isIm = false;
+        if (conversationObj.is_channel && channelsToRead.includes(conversationObj.name)) {
+            conversationId = conversationObj.id;
+            channelName = conversationObj.name;
+        } else if (conversationObj.is_im && conversationObj.id in imIdsToNames) {
+            conversationId = conversationObj.id;
+            channelName = imIdsToNames[conversationId];
+            isIm = true;
+        }
+
+        if (conversationId != null) {
             doFetch(
                 "https://slack.com/api/conversations.history",
                 {
-                    "channel": channelObj.id,
+                    "channel": conversationId,
                     "limit": 10,
                 },
-                (json) => { displayMessages(channelObj.name, json); });
+                (json) => { displayMessages(channelName, isIm, json); });
         }
     });
 };
@@ -118,7 +153,7 @@ function classNameForMessage(messageObj) {
 };
 
 
-function displayMessages(channelName, messagesJson) {
+function displayMessages(channelName, isIm, messagesJson) {
     let messagesArr = messagesJson.messages;
     messagesArr.sort((a, b) => {
         return -1 * (parseFloat(a.ts) - parseFloat(b.ts));
@@ -128,7 +163,11 @@ function displayMessages(channelName, messagesJson) {
 
     let header = document.createElement("div");
     header.className = "channelHeader";
-    header.innerHTML = `<h3>${escapeHTML("#" + channelName)}</h3>`;
+    if (isIm) {
+        header.innerHTML = `<h3>${escapeHTML("@" + channelName)}</h3>`;
+    } else {
+        header.innerHTML = `<h3>${escapeHTML("#" + channelName)}</h3>`;
+    }
     thisChannelDiv.appendChild(header);
 
     messagesArr.forEach((message) => {
