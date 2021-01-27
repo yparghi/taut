@@ -1,5 +1,8 @@
 /* TODOs:
  * - Use 'conversations.mark' for the read/unread cursor?
+ * - Consider an option to throw out the conversation ID lookup and skip
+ *   straight to fetching messages -- maybe by a 'channel:' url param format
+ *   similar to that for IMs.
  */
 
 var SLACK_API_TOKEN = "TAUT_VAR_SLACK_API_TOKEN";
