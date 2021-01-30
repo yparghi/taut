@@ -105,18 +105,16 @@ function escapeHTML(str){
     return p.innerHTML;
 }
 
-function debug(message) {
+function debug(messageThunk) {
     if (!debugEnabled) {
         return;
     }
-    console.log(message);
+    console.log(messageThunk());
 }
 
 
 function fetchMessages(conversationsJson) {
-    // TODO: Consider switching debug to use thunks, for lazy evaluation in
-    // case debug is disabled.
-    debug("Got conversations:\n" + objToString(conversationsJson));
+    debug(() => {"Got conversations:\n" + objToString(conversationsJson)});
 
     conversationsJson.channels.forEach((conversationObj) => {
         var conversationId = null;
